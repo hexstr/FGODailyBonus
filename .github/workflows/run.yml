@@ -1,0 +1,36 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Python package
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    - cron: '30 19 * * *'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Test
+      run: |
+        python3 main.py
+      env:
+        userIds: ${{ secrets.GAME_USERIDS }}
+        authKeys: ${{ secrets.GAME_AUTHKEYS }}
+        secretKeys: ${{ secrets.GAME_SECRETKEYS }}
+        verCode: ${{ secrets.GAME_VERCODE }}
+        UserAgent: ${{ secrets.GAME_USERAGENT }}
+        TGBotToken: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TGAdminId: ${{ secrets.TELEGRAM_ADMIN_ID }}
+        GithubToken: ${{ secrets.VERY_IMPORTANT_TOKEN }}
+        GithubName: ${{ secrets.VERY_IMPORTANT_NAME }}
