@@ -2,7 +2,15 @@
 `Fate/Go`每日签到脚本，自`2020/06/23`以来稳定运行中。
 
 ## 使用
-1. 首先创建一个名为`FGODailyBonusLog`的仓库，确保`branch`为`main`，点击`creating a new file`
+0. 首先提取`账号`、`密码`和`id`，文件位于`/sdcard/Android/data/com.aniplex.fategrandorder/files/data/54cc790bf952ea710ed7e8be08049531`，用记事本打开，从`字母Z`复制到结尾
+   ![0](imgs/0.jpg)
+   
+   然后搜索`C# Online Compiler`，比如[这个网站](https://www.onlinegdb.com/online_csharp_compiler)，把`CertificateExtractor.cs`中的内容复制粘贴到编辑框，修改第九行`YourCertificate`为你从`54cc790bf952ea710ed7e8be08049531`复制的内容，点击`Run`
+   ![0-1](imgs/0-1.jpg)
+
+   输出的结果对应`GAME_AUTHKEYS`、`GAME_SECRETKEYS`和`GAME_USERIDS`所需要的值
+
+1. 创建一个名为`FGODailyBonusLog`的仓库，确保`branch`为`main`，点击`creating a new file`
     ![1](imgs/1.jpg)
 
 2. 新建`cfg.json`并把[这里](https://raw.githubusercontent.com/nishuoshenme/FGODailyBonusLog/main/cfg.json)的内容复制粘贴，并点击`Commit new file`
@@ -37,7 +45,7 @@
 
 8. 默认签到时间为每日`UTC+0 19:30`，即东京时间`04:30`，如果需要修改，请自行搜索`cron 计算`并设置`.github/workflows/run.yml#L12`
 
-9. 注意：每次提交`commit`都会触发`Action`
+9.  注意：每次提交`commit`都会触发`Action`
 
 ## secrets列表
 | key                  | value                                                                 | description                                 |
