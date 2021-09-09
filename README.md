@@ -1,5 +1,6 @@
 # FGODailyBonus
-`Fate/Go`每日签到脚本，自`2020/06/23`以来稳定运行中。
+`Fate/Go`每日签到脚本，自`2020/06/23`以来稳定运行中。  
+**但不排除有被封号的可能性，使用后果请自负。**
 
 ## 使用
 0. 首先提取`账号`、`密码`和`id`，文件位于`/sdcard/Android/data/com.aniplex.fategrandorder/files/data/54cc790bf952ea710ed7e8be08049531`，用记事本打开，从`字母Z`复制到结尾
