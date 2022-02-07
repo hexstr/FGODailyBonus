@@ -167,3 +167,4 @@ class user:
                 url.WriteConf(json.dumps(dict))
             else:
                 url.SendMessageToAdmin('update failed')
+                
