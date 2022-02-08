@@ -1,52 +1,52 @@
 # FGODailyBonus
-`Fate/Go`每日签到脚本，自`2020/06/23`以来稳定运行中。  
-**但不排除有被封号的可能性，使用后果请自负。**
+`Fate/Go` daily check-in script, stable since `2020/06/23`.  
+**But do not exclude the possibility of being blocked, use at your own risk. **
 
-## 使用
-0. 首先提取`账号`、`密码`和`id`，文件位于`/sdcard/Android/data/com.aniplex.fategrandorder/files/data/54cc790bf952ea710ed7e8be08049531`，用记事本打开，从`字母Z`复制到结尾
-   ![0](imgs/0.jpg)
+## Use
+0. First extract the `account`, `password` and `id`, the files are located in `/sdcard/Android/data/com.aniplex.fategrandorder/files/data/54cc790bf952ea710ed7e8be08049531`, open them with notepad and start with the `letter Z` and copy it to the end
+      ! [0](imgs/0.jpg)
    
-   然后搜索`C# Online Compiler`，比如[这个网站](https://www.onlinegdb.com/online_csharp_compiler)，把`CertificateExtractor.cs`中的内容复制粘贴到编辑框，修改第九行`YourCertificate`为你从`54cc790bf952ea710ed7e8be08049531`复制的内容，点击`Run`
-   ![0-1](imgs/0-1.jpg)
+      Then search for `C# Online Compiler`, e.g. [this site](https://www.onlinegdb.com/online_csharp_compiler), copy and paste the contents of `CertificateExtractor.cs` into the edit box and change the ninth line ` YourCertificate` to the content you copied from `54cc790bf952ea710ed7e8be08049531`, click `Run`
+      ! [0-1](imgs/0-1.jpg)
 
-   输出的结果对应`GAME_AUTHKEYS`、`GAME_SECRETKEYS`和`GAME_USERIDS`所需要的值
+      The output corresponds to the values needed for `GAME_AUTHKEYS`, `GAME_SECRETKEYS` and `GAME_USERIDS`
 
-1. 创建一个名为`FGODailyBonusLog`的仓库，确保`branch`为`main`，点击`creating a new file`
-    ![1](imgs/1.jpg)
+1. Create a repository called `FGODailyBonusLog`, make sure `branch` is `main` and click `creating a new file`
+        ! [1](imgs/1.jpg)
 
-2. 新建`cfg.json`并把[这里](https://raw.githubusercontent.com/nishuoshenme/FGODailyBonusLog/main/cfg.json)的内容复制粘贴，并点击`Commit new file`
-    ![2](imgs/2.jpg)
+2. Create a new `cfg.json` and copy and paste the contents of [here](https://raw.githubusercontent.com/nishuoshenme/FGODailyBonusLog/main/cfg.json) and click on `Commit new file`
+        ! [2](imgs/2.jpg)
 
-3. 点击[这个链接中](https://github.com/settings/tokens)的`Generate new token`，`Expiration`选择`No expiration`，并勾选`repo`，下滑点击`Generate token`创建一个`token`并记下来
-    ![3](imgs/3.jpg)
+3. Click on `Generate new token` in [this link](https://github.com/settings/tokens), select `No expiration` for `Expiration` and tick `repo`, slide down and click on `Generate token` to create a ` token` and write it down
+        ! [3](imgs/3.jpg)
 
-    这里是新生成的`token`  
-    ![3-1](imgs/3-1.jpg)
+        Here is the newly generated `token`  
+        ! [3-1](imgs/3-1.jpg)
 
-4. `fork`[这个repo](https://github.com/nishuoshenme/FGODailyBonus)，点击`Settings`->`New repository secret`来创建`secrets`。脚本需要的`secrets`参考[secrets列表](#secrets列表)。
-   ![4](imgs/4.jpg)
+4. `fork` [this repo](https://github.com/nishuoshenme/FGODailyBonus) and click `Settings`->`New repository secret` to create `secrets`. Refer to [secrets list](#secrets list) for the `secrets` needed for the script.
+      ! [4](imgs/4.jpg)
 
-5. 点击`Actions`并启用
-   ![5](imgs/5.jpg)
+5. Click on `Actions` and enable
+      ! [5](imgs/5.jpg)
 
-6. 最后，随意编辑一个文件
-   ![6](imgs/6.jpg)
+6. Finally, edit a file at random
+      ! [6](imgs/6.jpg)
 
-   （比如在`.gitignore`加一个空行）之后，点击`Commit changes`即可  
-   ![6-1](imgs/6-1.jpg)
+      (e.g. add a blank line to `.gitignore`) and then click `Commit changes`  
+      ! [6-1](imgs/6-1.jpg)
 
-7. 再次点击`Actions`查看运行结果
-   ![7](imgs/7.jpg)
+7. Click on `Actions` again to see the results
+      ! [7](imgs/7.jpg)
 
-   还有`telegram 通知`  
-   ![7-1](imgs/7-1.jpg)
+      And `telegram notifications`  
+      ! [7-1](imgs/7-1.jpg)
 
-   和`日志文件`  
-   ![7-2](imgs/7-2.jpg)
+      and `log files`  
+      ! [7-2](imgs/7-2.jpg)
 
-8. 默认签到时间为每日`UTC+0 19:30`，即东京时间`04:30`，如果需要修改，请自行搜索`cron 计算`并设置`.github/workflows/run.yml#L12`
+8. The default check-in time is daily `UTC+0 19:30`, i.e. Tokyo time `04:30`, if you need to change it, please search for `cron calculations` and set `.github/workflows/run.yml#L12` yourself
 
-9.  注意：每次提交`commit`都会触发`Action`
+9. Note: each commit `commit` will trigger `Action`
 
 ## secrets列表
 | key                  | value                                                                 | description                                 |
