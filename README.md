@@ -7,7 +7,7 @@
       ![0](imgs/0.jpg)
    
       Then search for `C# Online Compiler`, e.g. [this site](https://www.onlinegdb.com/online_csharp_compiler), copy and paste the contents of `CertificateExtractor.cs` into the edit box and change the ninth line ` YourCertificate` to the content you copied from `54cc790bf952ea710ed7e8be08049531`, click `Run`
-      ![0-1](imgs/0-1.jpg)
+      ![0-1](imgs/0-1.jpg) 
 
       The output corresponds to the values needed for `GAME_AUTHKEYS`, `GAME_SECRETKEYS` and `GAME_USERIDS`
 
