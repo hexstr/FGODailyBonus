@@ -15,6 +15,7 @@ class user:
         self.authKey = authKey
         self.secretKey = secretKey
         self.session = url.NewSession()
+        self.presentIds = ''
 
     def getAuthCode(self, par):
         par = {k: par[k] for k in sorted(par)}
@@ -119,6 +120,57 @@ class user:
         url.PostReq(
             self.session,
             "%s/home/top?_userId=%s" % (url.gameServerAddr, self.userId), req)
+        time.sleep(3)
+        self.presentList()
+
+    def  presentList(self):
+        par = {
+            'userId': self.userId,
+            'authKey': self.authKey,
+            'appVer': url.appVer,
+            'dateVer': url.dateVer,
+            'lastAccessTime': mytime.GetTimeStamp(),
+            'verCode': url.verCode,
+            'dataVer': url.dataVer
+        }
+        par['authCode'] = self.getAuthCode(par)
+        req = urllib.parse.urlencode(par)
+        data = url.PostReq(
+            self.session,
+            "%s/present/list?_userId=%s" % (url.gameServerAddr, self.userId), req)
+        if 'userPresentBox' in data['cache']['replaced']:
+            self.userPresentBox = data['cache']['replaced']['userPresentBox']
+            if len(self.userPresentBox):
+                for each in self.userPresentBox:
+                    if each['objectId'] == 2 or each['objectId'] == 4 or each['objectId'] == 100 or each['objectId'] == 101 or each['objectId'] == 102 or each['objectId'] == 2000 or each['objectId'] == 4001:
+                        if len(self.presentIds) == 0:
+                            self.presentIds = "[" + str(each['presentId'])
+                        else:
+                            self.presentIds = self.presentIds + "," + str(each['presentId'])
+        if len(self.presentIds):
+            self.presentIds = self.presentIds + "]"
+            time.sleep(3)
+            self.presentReceive()
+            
+                            
+    def  presentReceive(self):
+        par = {
+            'userId': self.userId,
+            'authKey': self.authKey,
+            'appVer': url.appVer,
+            'dateVer': url.dateVer,
+            'lastAccessTime': mytime.GetTimeStamp(),
+            'verCode': url.verCode,
+            'dataVer': url.dataVer,
+            'presentIds': self.presentIds,
+            'itemSelectIdx': '0',
+            'itemSelectNum': '0'
+        }
+        par['authCode'] = self.getAuthCode(par)
+        req = urllib.parse.urlencode(par)
+        url.PostReq(
+            self.session,
+            "%s/present/receive?_userId=%s" % (url.gameServerAddr, self.userId), req)
 
     def gameData(self):
         par = {
