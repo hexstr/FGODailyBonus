@@ -2,7 +2,7 @@ import os
 import time
 import mytime
 import fgourl as url
-from user import user  
+from user import user
 
 userIds = os.environ['userIds'].split(",")
 authKeys = os.environ['authKeys'].split(",")
