@@ -46,7 +46,7 @@
 
 8. The default check-in time is daily `UTC+0 19:30`, i.e. Tokyo time `04:30`, if you need to change it, please search for `cron calculations` and set `.github/workflows/run.yml#L12` yourself
 
-9. Note: each commit `commit` will trigger `Action`
+9. Note: each commit `commit` will trigger `Action` 
 
 ## secrets列表
 | key                  | value                                                                 | description                                 |
