@@ -1,6 +1,6 @@
-# FGODailyBonus
+4# FGODailyBonus
 `Fate/Go` daily check-in script, stable since `2020/06/23`.  
-**But do not exclude the possibility of being blocked, use at your own risk. **
+**But do not exclude the possibility of being blocked, use at your own risk. ** 
 
 ## Use 
 0. First extract the `account`, `password` and `id`, the files are located in `/sdcard/Android/data/com.aniplex.fategrandorder/files/data/54cc790bf952ea710ed7e8be08049531`, open them with notepad and start with the `letter Z` and copy it to the end
