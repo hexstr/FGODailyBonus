@@ -1,169 +1,138 @@
 # coding: utf-8
-import time
-import json
+import uuid
 import hashlib
 import base64
-import urllib.parse
-import fgourl as url
+from urllib.parse import quote_plus
+import fgourl
 import mytime
 
 
+class ParameterBuilder:
+    def __init__(self, uid: str, auth_key: str, secret_key: str):
+        self.uid_ = uid
+        self.auth_key_ = auth_key
+        self.secret_key_ = secret_key
+        self.content_ = ''
+        self.parameter_list_ = [
+            ('appVer', fgourl.app_ver_),
+            ('authKey', self.auth_key_),
+            ('dataVer', str(fgourl.data_ver_)),
+            ('dateVer', str(fgourl.date_ver_)),
+            ('idempotencyKey', str(uuid.uuid4())),
+            ('lastAccessTime', str(mytime.GetTimeStamp())),
+            ('userId', self.uid_),
+            ('verCode', fgourl.ver_code_),
+        ]
+
+    def AddParameter(self, key: str, value: str):
+        self.parameter_list_.append((key, value))
+
+    def Build(self) -> str:
+        self.parameter_list_.sort(key=lambda tup: tup[0])
+        temp = ''
+        for first, second in self.parameter_list_:
+            if temp:
+                temp += '&'
+                self.content_ += '&'
+            escaped_key = quote_plus(first)
+            if not second:
+                temp += first + '='
+                self.content_ += escaped_key + '='
+            else:
+                escaped_value = quote_plus(second)
+                temp += first + '=' + second
+                self.content_ += escaped_key + '=' + escaped_value
+
+        temp += ':' + self.secret_key_
+        self.content_ += '&authCode=' + quote_plus(base64.b64encode(hashlib.sha1(temp.encode('utf-8')).digest()))
+        return self.content_
+
+    def Clean(self):
+        self.content_ = ''
+        self.parameter_list_ = [
+            ('appVer', fgourl.app_ver_),
+            ('authKey', self.auth_key_),
+            ('dataVer', str(fgourl.data_ver_)),
+            ('dateVer', str(fgourl.date_ver_)),
+            ('idempotencyKey', str(uuid.uuid4())),
+            ('lastAccessTime', str(mytime.GetTimeStamp())),
+            ('userId', self.uid_),
+            ('verCode', fgourl.ver_code_),
+        ]
+
+
 class user:
-    def __init__(self, userId, authKey, secretKey):
-        self.name = ''
-        self.userId = (int)(userId)
-        self.authKey = authKey
-        self.secretKey = secretKey
-        self.session = url.NewSession()
+    def __init__(self, user_id: str, auth_key: str, secret_key: str):
+        self.name_ = ''
+        self.user_id_ = (int)(user_id)
+        self.s_ = fgourl.NewSession()
+        self.builder_ = ParameterBuilder(user_id, auth_key, secret_key)
 
-    def getAuthCode(self, par):
-        par = {k: par[k] for k in sorted(par)}
-        par = urllib.parse.urlencode(par, safe='+=:/ ')
-        text = par + ':' + self.secretKey
-        dig = hashlib.sha1(text.encode('utf-8')).digest()
-        return base64.b64encode(dig)
-
-    def userLogin(self):
-        self.gameData()
-        time.sleep(6)
-        self.topLogin()
-        time.sleep(3)
-        self.topHome()
+    def Post(self, url):
+        res = fgourl.PostReq(self.s_, url, self.builder_.Build())
+        self.builder_.Clean()
+        return res
 
     def topLogin(self):
-        lastAccessTime = mytime.GetTimeStamp()
-        userState = (
-            -lastAccessTime >> 2) ^ self.userId & url.dataServerFolderCrc
-        par = {
-            'userId': self.userId,
-            'authKey': self.authKey,
-            'appVer': url.appVer,
-            'dateVer': url.dateVer,
-            'lastAccessTime': lastAccessTime,
-            'verCode': url.verCode,
-            'userState': userState,
-            'assetbundleFolder': url.assetbundleFolder,
-            'dataVer': url.dataVer,
-            'isTerminalLogin': '1'
-        }
-        par['authCode'] = self.getAuthCode(par)
-        req = urllib.parse.urlencode(par)
+        lastAccessTime = self.builder_.parameter_list_[5][1]
+        userState = (-int(lastAccessTime) >> 2) ^ self.user_id_ & fgourl.data_server_folder_crc_
 
-        data = url.PostReq(
-            self.session,
-            "%s/login/top?_userId=%s" % (url.gameServerAddr, self.userId), req)
-        self.message = data['cache']['replaced']['userGame'][0]['message']
-        self.name = hashlib.md5(data['cache']['replaced']['userGame'][0]
-                                ['name'].encode('utf-8')).hexdigest()
-        self.stone = data['cache']['replaced']['userGame'][0]['stone']
-        self.lv = data['cache']['replaced']['userGame'][0]['lv']
-        self.exp = data['cache']['replaced']['userGame'][0]['exp']
-        self.ticket = 0
+        self.builder_.AddParameter('assetbundleFolder', fgourl.asset_bundle_folder_)
+        self.builder_.AddParameter('isTerminalLogin', '1')
+        self.builder_.AddParameter('userState', str(userState))
+        data = self.Post(f'{fgourl.server_addr_}/login/top?_userId={self.user_id_}')
+
+        self.name_ = hashlib.md5(data['cache']['replaced']['userGame'][0]['name'].encode('utf-8')).hexdigest()
+        stone = data['cache']['replaced']['userGame'][0]['stone']
+        lv = data['cache']['replaced']['userGame'][0]['lv']
+        ticket = 0
 
         # 呼符
         for item in data['cache']['replaced']['userItem']:
-            if (item['itemId'] == 4001):
-                self.ticket = item['num']
+            if item['itemId'] == 4001:
+                ticket = item['num']
                 break
 
         # 登陆天数
-        res = "[%s]\n`登陆天数: %s天 / %s天\n" % (
-            self.name,
-            data['cache']['updated']['userLogin'][0]['seqLoginCount'],
-            data['cache']['updated']['userLogin'][0]['totalLoginCount'])
+        login_days = data['cache']['updated']['userLogin'][0]['seqLoginCount']
+        total_days = data['cache']['updated']['userLogin'][0]['totalLoginCount']
+        res = f'*{self.name_}*\n`登陆天数: {login_days}天 / {total_days}天\n'
 
         # 角色信息
-        res += "等级: %s\n石头: %s\n呼符: %s\n" % (self.lv, self.stone, self.ticket)
+        res += f'等级: {lv}\n石头: {stone}\n呼符: {ticket}\n'
 
         # 现有体力
-        #actMax = data['cache']['replaced']['userGame'][0]['actMax']
-        #actRecoverAt = data['cache']['replaced']['userGame'][0]['actRecoverAt']
-        #res += "现存体力: %s\n" % (actMax - (actRecoverAt - mytime.GetTimeStamp()) / 300)
+        act_max = data['cache']['replaced']['userGame'][0]['actMax']
+        act_recover_at = data['cache']['replaced']['userGame'][0]['actRecoverAt']
+        now_act = (act_max - (act_recover_at - mytime.GetTimeStamp()) / 300)
+        res += f'体力: {now_act} / {act_max}\n'
 
         # 友情点
-        res += "友情点: %s / %s`\n" % (
-            data['response'][0]['success']['addFriendPoint'],
-            data['cache']['replaced']['tblUserGame'][0]['friendPoint'])
+        add_fp = data['response'][0]['success']['addFriendPoint']
+        total_fp = data['cache']['replaced']['tblUserGame'][0]['friendPoint']
+        res += f'友情点: {add_fp} / {total_fp}`\n'
 
         # 登陆奖励
         if 'seqLoginBonus' in data['response'][0]['success']:
-            res += '*%s*\n`' % data['response'][0]['success']['seqLoginBonus'][
-                0]['message']
-            for i in data['response'][0]['success']['seqLoginBonus'][0][
-                    'items']:
-                res += "%s X %s\n" % (i['name'], i['num'])
+            bonus_message = data['response'][0]['success']['seqLoginBonus'][0]['message']
+            res += f'*{bonus_message}*\n`'
+
+            for i in data['response'][0]['success']['seqLoginBonus'][0]['items']:
+                res += f'{i["name"]} X {i["num"]}\n'
+
             if 'campaignbonus' in data['response'][0]['success']:
-                res += '`*%s*\n*%s*\n`' % (
-                    data['response'][0]['success']['campaignbonus'][0]['name'],
-                    data['response'][0]['success']['campaignbonus'][0]
-                    ['detail'])
-                for i in data['response'][0]['success']['campaignbonus'][0][
-                        'items']:
-                    res += "%s X %s\n" % (i['name'], i['num'])
+                bonus_name = data['response'][0]['success']['campaignbonus'][0]['name']
+                bonus_detail = data['response'][0]['success']['campaignbonus'][0]['detail']
+                res += f'`*{bonus_name}*\n*{bonus_detail}*\n`'
+
+                for i in data['response'][0]['success']['campaignbonus'][0]['items']:
+                    res += f'{i["name"]} X {i["num"]}\n'
             res += '`'
-        return res + '_%s_\n--------\n' % mytime.TimeStampToString(
-            data['cache']['serverTime'])
+
+        server_now_time = mytime.TimeStampToString(data['cache']['serverTime'])
+        res += f'_{server_now_time}_\n--------\n'
+        print(res)
+        return res
 
     def topHome(self):
-        par = {
-            'userId': self.userId,
-            'authKey': self.authKey,
-            'appVer': url.appVer,
-            'dateVer': url.dateVer,
-            'lastAccessTime': mytime.GetTimeStamp(),
-            'verCode': url.verCode,
-            'dataVer': url.dataVer
-        }
-        par['authCode'] = self.getAuthCode(par)
-        req = urllib.parse.urlencode(par)
-        url.PostReq(
-            self.session,
-            "%s/home/top?_userId=%s" % (url.gameServerAddr, self.userId), req)
-
-    def gameData(self):
-        par = {
-            'userId': self.userId,
-            'authKey': self.authKey,
-            'appVer': url.appVer,
-            'dateVer': url.dateVer,
-            'lastAccessTime': mytime.GetTimeStamp(),
-            'verCode': url.verCode,
-            'dataVer': url.dataVer
-        }
-        par['authCode'] = self.getAuthCode(par)
-        req = urllib.parse.urlencode(par)
-        data = url.PostReq(
-            self.session,
-            "%s/gamedata/top?_userId=%s" % (url.gameServerAddr, self.userId),
-            req)
-        if 'action' in data['response'][0]['fail'] and data['response'][0][
-                'fail']['action'] == "app_version_up":
-            url.UpdateAppVer(data['response'][0]['fail']['detail'].replace(
-                "\r\n", ""))
-            self.gameData()
-            return
-        if data['response'][0]['success']['dateVer'] != url.dateVer or data[
-                'response'][0]['success']['dataVer'] != url.dataVer:
-            s = "*Need Update*\n"
-            s += "appVer: %s\n" % (url.appVer)
-            s += "dateVer: %s Server: %s\n" % (
-                url.dateVer, data['response'][0]['success']['dateVer'])
-            s += "dataVer: %s Server: %s" % (
-                url.dataVer, data['response'][0]['success']['dataVer'])
-            url.SendMessageToAdmin(s)
-            val = url.UpdateBundleFolder(
-                data['response'][0]['success']['assetbundle'])
-            if val == 1:
-                url.dataVer = data['response'][0]['success']['dataVer']
-                url.dateVer = data['response'][0]['success']['dateVer']
-                dict = {}
-                dict['global'] = {
-                    "appVer": url.appVer,
-                    "assetbundleFolder": url.assetbundleFolder,
-                    "dataServerFolderCrc": url.dataServerFolderCrc,
-                    "dataVer": url.dataVer,
-                    "dateVer": url.dateVer
-                }
-                url.WriteConf(json.dumps(dict))
-            else:
-                url.SendMessageToAdmin('update failed')
+        self.Post(f'{fgourl.server_addr_}/home/top?_userId={self.user_id_}')

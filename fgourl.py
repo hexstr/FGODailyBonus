@@ -1,123 +1,121 @@
 import json
+import binascii
+import base64
 import re
 import requests
 import mytime
-import binascii
-import base64
 import CatAndMouseGame
 
-requests.packages.urllib3.disable_warnings()
+requests.urllib3.disable_warnings()
 session = requests.Session()
+session.verify = False
 
-#===== Game's arguments =====
-appVer = ''
-dateVer = 0
-verCode = ''
-assetbundleFolder = ''
-dataVer = 0
-dataServerFolderCrc = ''
-gameServerAddr = "https://game.fate-go.jp"
-GithubToken = ''
-GithubName = ''
-UserAgent = 'Dalvik/2.1.0 (Linux; U; Android 11; Pixel 5 Build/RD1A.201105.003.A1)'
+# ===== Game's parameters =====
+app_ver_ = ''
+data_ver_ = 0
+date_ver_ = 0
+ver_code_ = ''
+asset_bundle_folder_ = ''
+data_server_folder_crc_ = 0
+server_addr_ = 'https://game.fate-go.jp'
+github_token_ = ''
+github_name_ = ''
+user_agent_ = 'Dalvik/2.1.0 (Linux; U; Android 11; Pixel 5 Build/RD1A.201105.003.A1)'
 
 
-#==== User Info ====
+# ==== User Info ====
 def ReadConf():
     data = json.loads(
         requests.get(
-            url=
-            f"https://github.com/{GithubName}/FGODailyBonusLog/raw/main/cfg.json"
-        ).text)
-    global appVer, dateVer, assetbundleFolder, dataVer, dataServerFolderCrc
-    appVer = data['global']['appVer']
-    dataVer = data['global']['dataVer']
-    dateVer = data['global']['dateVer']
-    assetbundleFolder = data['global']['assetbundleFolder']
-    dataServerFolderCrc = data['global']['dataServerFolderCrc']
+            url=f'https://raw.githubusercontent.com/{github_name_}/FGODailyBonusLog/main/cfg.json', verify=False
+        ).text
+    )
+    global app_ver_, data_ver_, date_ver_, asset_bundle_folder_, data_server_folder_crc_
+    app_ver_ = data['global']['appVer']
+    data_ver_ = data['global']['dataVer']
+    date_ver_ = data['global']['dateVer']
+    asset_bundle_folder_ = data['global']['assetbundleFolder']
+    data_server_folder_crc_ = data['global']['dataServerFolderCrc']
 
 
 def WriteConf(data):
-    UploadFileToRepo('cfg.json', data, "update config")
+    UploadFileToRepo('cfg.json', data, 'update config')
 
 
 def UpdateBundleFolder(assetbundle):
-    new_assetbundle = CatAndMouseGame.MouseInfoMsgPack(
-        base64.b64decode(assetbundle))
-    print("new_assetbundle: %s" % new_assetbundle)
-    global assetbundleFolder, dataServerFolderCrc
-    assetbundleFolder = new_assetbundle
-    dataServerFolderCrc = binascii.crc32(new_assetbundle.encode('utf8'))
+    new_assetbundle = CatAndMouseGame.MouseInfoMsgPack(base64.b64decode(assetbundle))
+    print(f'new_assetbundle: {new_assetbundle}')
+    global asset_bundle_folder_, data_server_folder_crc_
+    asset_bundle_folder_ = new_assetbundle
+    data_server_folder_crc_ = binascii.crc32(new_assetbundle.encode('utf8'))
     return 1
 
 
 def UpdateAppVer(detail):
     matchObj = re.match('.*新ver.：(.*)、現.*', detail)
     if matchObj:
-        global appVer
-        appVer = matchObj.group(1)
-        print("new version: %s" % appVer)
+        global app_ver_
+        app_ver_ = matchObj.group(1)
+        print(f'new version: {app_ver_}')
     else:
-        print("No matches")
-        raise Exception("update app ver failed")
+        print('No matches')
+        raise Exception('update app ver failed')
 
 
-#===== End =====
+# ===== End =====
 
-#===== Telegram arguments =====
+# ===== Telegram arguments =====
 TelegramBotToken = ''
 TelegramAdminId = ''
 
 
 def SendMessageToAdmin(message):
-    if (TelegramBotToken != 'nullvalue'):
+    if TelegramBotToken != 'nullvalue':
         nowtime = mytime.GetFormattedNowTime()
-        url = "https://api.telegram.org/bot%s/sendMessage?chat_id=%s&parse_mode=markdown&text=_%s_\n%s" % (
-            TelegramBotToken, TelegramAdminId, nowtime, message)
-        result = json.loads(requests.get(url).text)
+        url = f'https://api.telegram.org/bot{TelegramBotToken}/sendMessage?chat_id={TelegramAdminId}&parse_mode=markdown&text=_{nowtime}_\n{message}'
+        result = json.loads(requests.get(url, verify=False).text)
         if not result['ok']:
             print(result)
             print(message)
-            raise 'something wrong'
 
 
-#===== End =====
+# ===== End =====
 
 
-#===== Github api =====
-def UploadFileToRepo(filename, content, commit="updated"):
-    url = f"https://api.github.com/repos/{GithubName}/FGODailyBonusLog/contents/" + filename
+# ===== Github api =====
+def UploadFileToRepo(filename, content, commit='updated'):
+    url = f'https://api.github.com/repos/{github_name_}/FGODailyBonusLog/contents/' + filename
     res = requests.get(url=url)
     jobject = json.loads(res.text)
     header = {
-        "Content-Type": "application/json",
-        "User-Agent": f"{GithubName}_bot",
-        "Authorization": "token " + GithubToken
+        'Content-Type': 'application/json',
+        'User-Agent': f'{github_name_}_bot',
+        'Authorization': 'token ' + github_token_,
     }
     content = str(base64.b64encode(content.encode('utf-8')), 'utf-8')
     form = {
-        "message": commit,
-        "committer": {
-            "name": f"{GithubName}_bot",
-            "email": "none@none.none"
+        'message': commit,
+        'committer': {
+            'name': f'{github_name_}_bot',
+            'email': 'none@none.none'
         },
-        "content": content
+        'content': content,
     }
-    if "sha" in jobject:
-        form["sha"] = jobject["sha"]
+    if 'sha' in jobject:
+        form['sha'] = jobject['sha']
     form = json.dumps(form)
     result = requests.put(url, data=form, headers=header)
     print(result.status_code)
 
 
-#===== End =====
+# ===== End =====
 
 httpheader = {
     'Accept-Encoding': 'gzip, identity',
-    'User-Agent': UserAgent,
+    'User-Agent': user_agent_,
     'Content-Type': 'application/x-www-form-urlencoded',
     'Connection': 'Keep-Alive, TE',
-    'TE': 'identity'
+    'TE': 'identity',
 }
 
 
@@ -125,10 +123,50 @@ def NewSession():
     return requests.Session()
 
 
-def PostReq(session, url, data):
-    res = session.post(url, data=data, headers=httpheader, verify=False).json()
-    if res['response'][0]['resCode'] != '00':
-        SendMessageToAdmin("[ErrorCode: %s]\n%s" %
-                           (res['response'][0]['resCode'],
-                            res['response'][0]['fail']['detail']))
+def PostReq(s, url, data):
+    res = s.post(url, data=data, headers=httpheader, verify=False).json()
+    res_code = res['response'][0]['resCode']
+    if res_code != '00':
+        detail = res['response'][0]['fail']['detail']
+        message = f'[ErrorCode: {res_code}]\n{detail}'
+        SendMessageToAdmin(message)
+        raise Exception(message)
     return res
+
+
+def gameData():
+    global app_ver_, data_ver_, date_ver_
+    data = requests.get(
+        f'{server_addr_}/gamedata/top?appVer={app_ver_}&dataVer={data_ver_}&dateVer={date_ver_}', verify=False
+    ).json()
+
+    if 'action' in data['response'][0]['fail'] and data['response'][0]['fail']['action'] == 'app_version_up':
+        UpdateAppVer(data['response'][0]['fail']['detail'].replace('\r\n', ''))
+        gameData()
+        return
+
+    if (
+        data['response'][0]['success']['dateVer'] != date_ver_
+        or data['response'][0]['success']['dataVer'] != data_ver_
+    ):
+        s = '*Need update*\n'
+        s += f'appVer: {app_ver_}\n'
+        s += f'dateVer: {date_ver_} Server: {data["response"][0]["success"]["dateVer"]}\n'
+        s += f'dataVer: {data_ver_} Server: {data["response"][0]["success"]["dataVer"]}'
+        SendMessageToAdmin(s)
+
+        val = UpdateBundleFolder(data['response'][0]['success']['assetbundle'])
+        if val == 1:
+            data_ver_ = data['response'][0]['success']['dataVer']
+            date_ver_ = data['response'][0]['success']['dateVer']
+            new_data = {}
+            new_data['global'] = {
+                'appVer': app_ver_,
+                'assetbundleFolder': asset_bundle_folder_,
+                'dataServerFolderCrc': data_server_folder_crc_,
+                'dataVer': data_ver_,
+                'dateVer': date_ver_,
+            }
+            WriteConf(json.dumps(new_data))
+        else:
+            SendMessageToAdmin('Update failed')

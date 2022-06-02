@@ -14,7 +14,7 @@
 1. 创建一个名为`FGODailyBonusLog`的仓库，确保`branch`为`main`，点击`creating a new file`
     ![1](imgs/1.jpg)
 
-2. 新建`cfg.json`并把[这里](https://raw.githubusercontent.com/nishuoshenme/FGODailyBonusLog/main/cfg.json)的内容复制粘贴，并点击`Commit new file`
+2. 新建`cfg.json`并把[这里](https://raw.githubusercontent.com/hexstr/FGODailyBonusLog/main/cfg.json)的内容复制粘贴，并点击`Commit new file`
     ![2](imgs/2.jpg)
 
 3. 点击[这个链接中](https://github.com/settings/tokens)的`Generate new token`，`Expiration`选择`No expiration`，并勾选`repo`，下滑点击`Generate token`创建一个`token`并记下来
@@ -23,7 +23,7 @@
     这里是新生成的`token`  
     ![3-1](imgs/3-1.jpg)
 
-4. `fork`[这个repo](https://github.com/nishuoshenme/FGODailyBonus)，点击`Settings`->`New repository secret`来创建`secrets`。脚本需要的`secrets`参考[secrets列表](#secrets列表)。
+4. `fork`[这个repo](https://github.com/hexstr/FGODailyBonus)，点击`Settings`->`New repository secret`来创建`secrets`。脚本需要的`secrets`参考[secrets列表](#secrets列表)。
    ![4](imgs/4.jpg)
 
 5. 点击`Actions`并启用
@@ -55,7 +55,7 @@
 | GAME_SECRETKEYS      | RaNdOmStRiNg1234:randomAAAAA=,RaNdOmStRiNg1235:randomAAAAA=           | 对应的密码，多个账号使用英文逗号","分隔     |
 | GAME_USERAGENT       | Dalvik/2.1.0 (Linux; U; Android 11; Pixel 5 Build/RD1A.201105.003.A1) | 伪装UA，填入nullvalue使用默认值             |
 | GAME_USERIDS         | 60951234,60951235                                                     | 账号id                                      |
-| GAME_VERCODE         | 723d93a599b6f10ef3085ff1131fa5679a91da924246b8ca40dded18eccaf3da      | ←填这个就行                                 |
+| GAME_VERCODE         | 48a1e86bdbb80b4795204d447cfc073ce21b132a5bd5b096cb919830b1d3b93e      | ←填这个就行                                 |
 | TELEGRAM_ADMIN_ID    | nullvalue                                                             | 接收通知的telegram id，不需要就填nullvalue  |
 | TELEGRAM_BOT_TOKEN   | nullvalue                                                             | 发送通知的bot token，不需要就填nullvalue    |
 | VERY_IMPORTANT_NAME  | your_github_name                                                      | 填你的github name                           |
