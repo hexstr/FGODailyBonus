@@ -14,7 +14,11 @@
 1. 创建一个名为`FGODailyBonusLog`的仓库，确保`branch`为`main`，点击`creating a new file`
     ![1](imgs/1.jpg)
 
-2. 新建`cfg.json`并把[这里](https://raw.githubusercontent.com/hexstr/FGODailyBonusLog/main/cfg.json)的内容复制粘贴，并点击`Commit new file`
+2. 新建`cfg.json`并复制粘贴
+   ```json
+   {"global": {"appVer": "2.54.0", "assetbundleFolder": "trb3ulHJR4lI/", "dataServerFolderCrc": 610168911, "dataVer": 1419, "dateVer": 1655046000}}
+   ```
+   然后点击`Commit new file`
     ![2](imgs/2.jpg)
 
 3. 点击[这个链接中](https://github.com/settings/tokens)的`Generate new token`，`Expiration`选择`No expiration`，并勾选`repo`，下滑点击`Generate token`创建一个`token`并记下来
