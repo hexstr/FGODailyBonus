@@ -5,6 +5,7 @@ import base64
 from urllib.parse import quote_plus
 import fgourl
 import mytime
+import rsa
 
 
 class ParameterBuilder:
@@ -74,9 +75,12 @@ class user:
         return res
 
     def topLogin(self):
+        idempotencyKey = self.builder_.parameter_list_[4][1]
+        idempotencyKeySignature = rsa.sign(f'{self.user_id_}{idempotencyKey}')
         lastAccessTime = self.builder_.parameter_list_[5][1]
         userState = (-int(lastAccessTime) >> 2) ^ self.user_id_ & fgourl.data_server_folder_crc_
 
+        self.builder_.AddParameter('idempotencyKeySignature', idempotencyKeySignature)
         self.builder_.AddParameter('assetbundleFolder', fgourl.asset_bundle_folder_)
         self.builder_.AddParameter('isTerminalLogin', '1')
         self.builder_.AddParameter('userState', str(userState))
