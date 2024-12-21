@@ -2,6 +2,21 @@
 `Fate/Go`每日签到脚本，自`2020/06/23`以来稳定运行中。  
 **但不排除有被封号的可能性，使用后果请自负。**
 
+> [!NOTE]
+> 现在FGO新增了`play integrity api`，使用这个脚本可能造成账号被标记，导致登录时需要满足`App Check`的条件，不然会出现`99-`开头的错误代码
+> 
+> ![a0](imgs/a0.jpg)
+> 
+> 经过测试，只需要设备通过`MEETS_BASIC_INTEGRITY`即可正常登录
+> 
+> ![a1](imgs/a1.jpg)
+> 
+> ![a2](imgs/a2.jpg)
+> 
+> 否则依然会出错
+> 
+> ![a3](imgs/a3.jpg)
+
 ## 使用
 0. 首先提取`账号`、`密码`和`id`，文件位于`/sdcard/Android/data/com.aniplex.fategrandorder/files/data/54cc790bf952ea710ed7e8be08049531`，用记事本打开，从`字母Z`复制到结尾
    ![0](imgs/0.jpg)
